@@ -2,7 +2,7 @@
 
 A simple docker container and docker compose configuration to get started with [mozilla-services/syncstorage-rs](https://github.com/mozilla-services/syncstorage-rs) to self-host a Firefox sync server.
 
-I didn't have much luck with the existing documentation and wrote this for my own infrastructure. There's no guarantee it will work for you but
+I didn't have much luck with the existing documentation and wrote this for my own infrastructure. There's no guarantee it will work for you.
 
 ## Getting started
 
