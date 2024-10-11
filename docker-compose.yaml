@@ -4,7 +4,7 @@ services:
     image: linuxserver/mariadb:10.6.13
     volumes:
       - ./data/config:/config
-      - ./data/init/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./data/initdb.d/init.sql:/config/initdb.d/init.sql
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: syncstorage
