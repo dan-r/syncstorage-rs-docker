@@ -1,1 +1,0 @@
-docker exec -it firefox_mariadb mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS syncstorage_rs;CREATE DATABASE IF NOT EXISTS tokenserver_rs;GRANT ALL PRIVILEGES on syncstorage_rs.* to sync@'%';GRANT ALL PRIVILEGES on tokenserver_rs.* to sync@'%';"
