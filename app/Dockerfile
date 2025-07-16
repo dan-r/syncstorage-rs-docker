@@ -25,7 +25,11 @@ RUN virtualenv venv \
     && /app/venv/bin/pip install pyopenssl==22.1.0
 
 # Cleanup
-RUN rm -rf /var/lib/{apt,dpkg,cache,log}
+RUN rm -rf \
+    /var/cache \
+    /var/log \
+    /var/lib/apt \
+    /var/lib/dpkg
 
 # Copy entrypoint script and set it
 COPY --chmod=755 entrypoint.sh /
