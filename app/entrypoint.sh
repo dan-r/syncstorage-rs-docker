@@ -12,13 +12,20 @@ url="$(echo ${SYNC_TOKENSERVER_DATABASE_URL/$proto/})"
 userpass="$(echo $url | grep @ | cut -d@ -f1)"
 pass="$(echo $userpass | grep : | cut -d: -f2)"
 user="$(echo $userpass | grep : | cut -d: -f1)"
-host="$(echo ${url/$user:$pass@/} | cut -d/ -f1)"
-port="$(echo $host | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
-host="$(echo ${host/:$port/} | cut -d/ -f1)"
-db="$(echo $url | grep / | cut -d/ -f2-)"
+hostport="$(echo ${url/$user:$pass@/} | cut -d/ -f1)"
+port="$(echo $hostport | sed -e 's,^.*:,:,g' -e 's,.*:\([0-9]*\).*,\1,g' -e 's,[^0-9],,g')"
+host="$(echo ${hostport/:$port/} | cut -d/ -f1)"
+db="$(echo $url | grep / | cut -d/ -f2 | cut -d? -f1)"
+IFS="&" read -ra options <<< $(echo $url | grep ? | cut -d? -f2)
+for option in "${options[@]}"
+do
+    declare "$(echo $option | cut -d= -f1)=$(echo $option | cut -d= -f2)"
+done
 
 # Create service and node if they doesnt exist
-mysql $db -h $host -P $port -u $user -p"$pass" <<EOF
+if [[ $host ]] && [[ $port ]]
+then
+    mysql $db -h $host -P $port -u $user -p"$pass" <<EOF
 DELETE FROM services;
 INSERT INTO services (id, service, pattern) VALUES
     (1, "sync-1.5", "{node}/1.5/{uid}");
@@ -26,6 +33,21 @@ INSERT INTO nodes (id, service, node, capacity, available, current_load, downed,
     (1, 1, "${SYNC_URL}", ${SYNC_CAPACITY}, ${SYNC_CAPACITY}, 0, 0, 0)
     ON DUPLICATE KEY UPDATE node = "${SYNC_URL}", capacity = ${SYNC_CAPACITY}, available = (SELECT ${SYNC_CAPACITY} - current_load from (SELECT * FROM nodes) as n2 where id = 1);
 EOF
+elif [[ $unix_socket ]]
+then
+    mysql $db -S $unix_socket -u $user -p"$pass" <<EOF
+DELETE FROM services;
+INSERT INTO services (id, service, pattern) VALUES
+    (1, "sync-1.5", "{node}/1.5/{uid}");
+INSERT INTO nodes (id, service, node, capacity, available, current_load, downed, backoff) VALUES
+    (1, 1, "${SYNC_URL}", ${SYNC_CAPACITY}, ${SYNC_CAPACITY}, 0, 0, 0)
+    ON DUPLICATE KEY UPDATE node = "${SYNC_URL}", capacity = ${SYNC_CAPACITY}, available = (SELECT ${SYNC_CAPACITY} - current_load from (SELECT * FROM nodes) as n2 where id = 1);
+EOF
+else
+    echo "No socket nor port and host provided, exiting"
+    exit 10
+fi
+
 
 # Write config file
 cat > /config/local.toml <<EOF
