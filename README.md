@@ -51,9 +51,9 @@ This will delete the compiled Rust app and any cached layers, and also delete th
 
 Once your app is running, you can configure Firefox by updating the `about:config` settings.
 
-`identity.sync.tokenserver.uri` needs to be set to the `SYNC_URL` configured in your `.env` file followed by `/token/1.0/sync/1.5`. 
+`identity.sync.tokenserver.uri` needs to be set to the `SYNC_URL` configured in your `.env` file followed by `/1.0/sync/1.5`. 
 
->Example: http://sync.example.com:8000/token/1.0/sync/1.5
+>Example: http://sync.example.com:8000/1.0/sync/1.5
 
 To confirm the sync is working you can enable success logs in `about:config` also. Set `services.sync.log.appender.file.logOnSuccess` to true. Now you should see sync logs in `about:sync-log`
 
