@@ -1,5 +1,7 @@
 from rust:latest
 
+ARG GIT_COMMIT=1dc421474df2a4ee973d529534cd0eb7189d58ce
+
 # Create needed directories
 RUN mkdir /app /config
 WORKDIR /app
@@ -14,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Clone syncstorage-rs and build it
 RUN git clone https://github.com/mozilla-services/syncstorage-rs ./ \
+    && git checkout ${GIT_COMMIT} \
     && cargo install --path ./syncserver --no-default-features --features=syncstorage-db/mysql --locked \
     && cargo install diesel_cli --no-default-features --features 'mysql' \
     && cargo clean
