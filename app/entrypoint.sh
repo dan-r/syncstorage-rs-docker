@@ -18,7 +18,7 @@ host="$(echo ${host/:$port/} | cut -d/ -f1)"
 db="$(echo $url | grep / | cut -d/ -f2-)"
 
 # Create service and node if they doesnt exist
-mysql $db -h $host -P $port -u $user -p"$pass" <<EOF
+mysql --skip-ssl $db -h $host -P $port -u $user -p"$pass" <<EOF
 DELETE FROM services;
 INSERT INTO services (id, service, pattern) VALUES
     (1, "sync-1.5", "{node}/1.5/{uid}");
