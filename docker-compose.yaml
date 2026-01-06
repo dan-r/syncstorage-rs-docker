@@ -20,7 +20,7 @@ services:
       - "${SYNCSERVER_HOST_PORT:-5300}:8000"
     depends_on:
       - mariadb
-  environment:
+    environment:
       LOGLEVEL: info
       SYNC_URL: ${SYNC_URL}
       SYNC_CAPACITY: 10 # Max number of users that will be accepted
