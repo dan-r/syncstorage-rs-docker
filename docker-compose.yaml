@@ -3,8 +3,9 @@ services:
     container_name: firefox_mariadb
     image: linuxserver/mariadb:10.6.13
     volumes:
-      - ./data/config:/config
-      - ./data/initdb.d/init.sql:/config/initdb.d/init.sql
+      # Optional volume path for MariaDB config/data
+      - ${MARIADB_DATA_PATH:-./data/config}:/config
+      - ${MARIADB_INIT_PATH:-./data/initdb.d/init.sql}:/config/initdb.d/init.sql
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: syncstorage
@@ -17,14 +18,16 @@ services:
     build: ./app/
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      # Optional outbound (host) port mapping
+      - "${SYNCSERVER_HOST_PORT:-8000}:8000"
     depends_on:
       - mariadb
     environment:
       LOGLEVEL: info
       SYNC_URL: ${SYNC_URL}
-      SYNC_CAPACITY: 10 # Max number of users that will be accepted
+      SYNC_CAPACITY: 10
       SYNC_MASTER_SECRET: ${SYNC_MASTER_SECRET}
       METRICS_HASH_SECRET: ${METRICS_HASH_SECRET}
+      # Update these to match the SYNC_URL if the port changes
       SYNC_SYNCSTORAGE_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/syncstorage_rs
       SYNC_TOKENSERVER_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/tokenserver_rs
