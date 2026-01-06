@@ -21,11 +21,10 @@ services:
     depends_on:
       - mariadb
   environment:
-      RUST_LOG: info
-      RUST_BACKTRACE: 1
-      SYNC_URL: ${SYNC_URL:-http://192.168.178.57:5300}
-      SYNC_CAPACITY: 10
+      LOGLEVEL: info
+      SYNC_URL: ${SYNC_URL}
+      SYNC_CAPACITY: 10 # Max number of users that will be accepted
       SYNC_MASTER_SECRET: ${SYNC_MASTER_SECRET}
       METRICS_HASH_SECRET: ${METRICS_HASH_SECRET}
       SYNC_SYNCSTORAGE_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/syncstorage_rs?ssl-mode=disabled
-      SYNC_TOKENSERVER_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/syncstorage_rs?ssl-mode=disabled
+      SYNC_TOKENSERVER_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/tokenserver_rs?ssl-mode=disabled
