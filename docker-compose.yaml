@@ -4,10 +4,9 @@ services:
     image: linuxserver/mariadb:10.6.13
     volumes:
       - ${MARIADB_DATA_PATH:-./data/config}:/config
-      - ${MARIADB_INIT_PATH:-./data/initdb.d/init.sql}:/config/initdb.d/init.sql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: syncstorage
+      MYSQL_DATABASE: syncstorage_rs
       MYSQL_USER: sync
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -26,5 +25,5 @@ services:
       SYNC_CAPACITY: 10
       SYNC_MASTER_SECRET: ${SYNC_MASTER_SECRET}
       METRICS_HASH_SECRET: ${METRICS_HASH_SECRET}
-      SYNC_SYNCSTORAGE_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/syncstorage_rs
-      SYNC_TOKENSERVER_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/tokenserver_rs
+      SYNC_SYNCSTORAGE_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/syncstorage_rs?ssl-mode=disabled
+      SYNC_TOKENSERVER_DATABASE_URL: mysql://sync:${MYSQL_PASSWORD}@mariadb:3306/syncstorage_rs?ssl-mode=disabled
