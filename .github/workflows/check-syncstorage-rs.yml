@@ -1,0 +1,61 @@
+name: Check external repo releases
+
+on:
+  schedule:
+    - cron: '0 2 * * *'     # every day at 2:00 AM UTC
+  workflow_dispatch:        # manual run
+
+env:
+  EXTERNAL_OWNER: "mozilla-services"        # <-- change this
+  EXTERNAL_REPO: "syncstorage-rs"     # <-- change this
+  RELEASE_FILE: "syncstorage-rs-release-version"   # file to store last-seen tag
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get latest release from external repo
+        id: latest
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = process.env.EXTERNAL_OWNER;
+            const repo = process.env.EXTERNAL_REPO;
+            try {
+              const r = await github.rest.repos.getLatestRelease({ owner, repo });
+              core.setOutput('tag', r.data.tag_name);
+              core.setOutput('url', r.data.html_url);
+            } catch (err) {
+              console.log("No valid release data found.");
+              core.setOutput('tag', '');
+            }
+
+      # no point in comparing with the old version. We can overwrite the file
+      # here and run git commit which will do nothing if the versions match.
+      - name: Compare and update
+        if: steps.latest.outputs.tag != ''
+        run: |
+          echo "${{ steps.latest.outputs.tag }}" > $RELEASE_FILE
+
+      - name: Create Pull Request
+        if: steps.latest.outputs.tag != ''
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          commit-message: "chore: update ${{ env.EXTERNAL_OWNER}}/${{ env.EXTERNAL_REPO}} to ${{ steps.latest.outputs.tag }}"
+          title: "Update ${{ env.EXTERNAL_OWNER}}/${{ env.EXTERNAL_REPO}} to ${{ steps.latest.outputs.tag }}"
+          body: |
+            Detected new release of ${{ env.EXTERNAL_OWNER}}/${{ env.EXTERNAL_REPO}}: ${{ steps.latest.outputs.tag }}
+            ${{ steps.latest.outputs.url }}
+          branch: "update-external-release-${{ steps.latest.outputs.tag }}"
+          add-paths: ${{ env.RELEASE_FILE }}  # only commit the release file in these automatic pull requests
