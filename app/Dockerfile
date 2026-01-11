@@ -1,7 +1,5 @@
 from rust:latest
 
-ARG GIT_COMMIT=1dc421474df2a4ee973d529534cd0eb7189d58ce
-
 # Create needed directories
 RUN mkdir /app /config
 WORKDIR /app
@@ -16,14 +14,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Clone syncstorage-rs and build it
 RUN git clone https://github.com/mozilla-services/syncstorage-rs ./ \
-    && git checkout ${GIT_COMMIT} \
     && cargo install --path ./syncserver --no-default-features --features=syncstorage-db/mysql --locked \
     && cargo install diesel_cli --no-default-features --features 'mysql' \
     && cargo clean
 
 # Setup the Python venv
 RUN virtualenv venv \
-    && /app/venv/bin/pip install -r requirements.txt \
+    && /app/venv/bin/pip3 install flake8 hawkauthlib konfig pyramid pyramid_hawkauth requests simplejson unittest2 WebTest WSGIProxy2 poetry \
+    && /app/venv/bin/poetry self add poetry-plugin-export \
+    && /app/venv/bin/poetry install --without dev --with tokenserver-unit-tests --no-interaction --no-ansi \
     && /app/venv/bin/pip install -r tools/tokenserver/requirements.txt \
     && /app/venv/bin/pip install pyopenssl==22.1.0
 
