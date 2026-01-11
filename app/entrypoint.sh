@@ -4,7 +4,7 @@ sleep 5
 
 # First run all migrations
 /usr/local/cargo/bin/diesel --database-url "${SYNC_SYNCSTORAGE_DATABASE_URL}" migration --migration-dir syncstorage-mysql/migrations run
-/usr/local/cargo/bin/diesel --database-url "${SYNC_TOKENSERVER_DATABASE_URL}" migration --migration-dir tokenserver-db/migrations run
+/usr/local/cargo/bin/diesel --database-url "${SYNC_TOKENSERVER_DATABASE_URL}" migration --migration-dir tokenserver-mysql/migrations run
 
 # Parse token server database URL
 proto="$(echo $SYNC_TOKENSERVER_DATABASE_URL | grep :// | sed -e's,^\(.*://\).*,\1,g')"
